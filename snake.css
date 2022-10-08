@@ -1,0 +1,38 @@
+#snake-controller {
+  font-size: 0px;
+  text-align: center;
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  z-index: 1;
+  display: none;
+  touch-action: none;
+}
+#snake-controller > div > div {
+  margin: 4px;
+  width: 64px;
+  height: 64px;
+  font-size: 20px;
+  display: inline-block;
+  -ms-flex-align: center;
+  border: 1px solid gray;
+  position: relative;
+  text-align: center;
+  user-select: none;
+  background-color: var(--bs-primary-lightest);
+}
+#snake-controller > div > div:hover {
+  background-color: white;
+}
+#snake-controller > div > div::before {
+  content: "";
+  height: 100%;
+  position: relative;
+  font-size: 0px;
+  vertical-align: middle;
+  display: inline-block;
+}
+#snake-controller > div > div span {
+  display: inline-block;
+  vertical-align: middle;
+}

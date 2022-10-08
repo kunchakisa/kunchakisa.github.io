@@ -59,6 +59,10 @@ body {
   text-shadow: none;
 }
 
+.opacity-10 {
+  opacity: .10 !important;
+}
+
 #about-section {
   border-color: var(--bs-primary-dark) !important;
   background-color: var(--bs-primary-lightest);
