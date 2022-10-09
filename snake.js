@@ -11,26 +11,50 @@
   let playtimeDiv = document.getElementById("game-playtime");
   let gameMessageDiv = document.getElementById("game-message");
 
+  // Add show control logic
   let showControlsButton = document.getElementById("game-showcontrols");
-  showControlsButton.addEventListener("mousedown", (event)=>{
-    event.preventDefault();
-    if (snakeControllerDiv.style.display === "") {
-      snakeControllerDiv.style.display = "initial";
-      showControlsButton.innerText = "Hide on-screen controls";
-    } else {
-      snakeControllerDiv.style.display = "";
-      showControlsButton.innerText = "Show on-screen controls";
+
+  {
+    function clickFunction() {
+      if (snakeControllerDiv.style.display === "") {
+        snakeControllerDiv.style.display = "initial";
+        showControlsButton.innerText = "Hide on-screen controls";
+        localStorage.setItem("game-iscontrolsshown", "true");
+      } else {
+        snakeControllerDiv.style.display = "";
+        showControlsButton.innerText = "Show on-screen controls";
+        localStorage.setItem("game-iscontrolsshown", "false");
+      }
     }
-  });
+    showControlsButton.addEventListener("mousedown", (event)=>{
+      event.preventDefault();
+      clickFunction();
+    });
+    // Get from local storage if the user opened the controls last session
+    let isControlsShown = localStorage.getItem("game-iscontrolsshown");
+    if (!(typeof isControlsShown === "undefined" || isControlsShown === "false")) {
+      clickFunction();
+    } 
+  }
   
   // Set up controls button and add event listeners
   {
     let query = snakeControllerDiv.querySelectorAll(".ctrl");
-    function clickFunction() {
-      gameInput(this.dataset.ctrlCode);
-    }
-    for (let elem of query) {
-      elem.addEventListener("click", clickFunction);
+    snakeControllerDiv.addEventListener('touchstart', (event) => clickFunction(event, true));
+    snakeControllerDiv.addEventListener('touchmove', (event) => clickFunction(event, false));
+    snakeControllerDiv.addEventListener('touchcancel', (e) => e.preventDefault());
+    function clickFunction(event, isTouchStart) {
+      let x = event.touches[0].clientX;
+      let y = event.touches[0].clientY;
+      for (let elem of query) {
+        let elemPos = elem.getBoundingClientRect();
+        if (elemPos.left <= x && x <= elemPos.right && elemPos.top <= y && elemPos.bottom >= y) {
+          if (isTouchStart || elem.dataset.hasOwnProperty("ctrlMoveTriggerable")) {
+            gameInput(elem.dataset.ctrlCode);
+          }
+          break;
+        }
+      }
     }
   }
 
@@ -486,8 +510,8 @@
         togglePause();
         return true;
       } else return false;
-      if (!isPaused && controlQueue.length < 3) {
-        if (toQueue === STEP_OPPOSITE[currentControl]) toQueue = currentControl;
+      if (!isPaused && controlQueue.length < 3 &&
+          toQueue !== STEP_OPPOSITE[currentControl] && toQueue !== currentControl) {
         controlQueue.push(toQueue);
       }
       return true;
