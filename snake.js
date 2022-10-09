@@ -9,6 +9,7 @@
   let crossCountDiv = document.getElementById("game-crossbuffs");
   let buffTimerDiv = document.getElementById("game-bufftimer");
   let playtimeDiv = document.getElementById("game-playtime");
+  let gameMessageDiv = document.getElementById("game-message");
 
   let showControlsButton = document.getElementById("game-showcontrols");
   showControlsButton.addEventListener("mousedown", (event)=>{
@@ -46,6 +47,8 @@
   const BOARD_PLAYER_1 = 3;
   const BOARD_PLAYER_2 = 4;
   const BOARD_CROSSBUFF = 5;
+  const BOARD_SHRINKBUFF = 6;
+  const BOARD_RISKYBUFF = 7;
   for (let y=0; y<BOARD_HEIGHT; y++) {
     let row = [];
     for (let x=0; x<BOARD_WIDTH; x++) {
@@ -92,10 +95,12 @@
   let playerTailX = playerX;
   let playerTailY = playerY;
   let playerScore = 0;
+  let playerMilestone = 0;
   let highScore = parseInt(localStorage.getItem("snake-highscore") | "0");
   let playerGrowCount = 1;
   let playerCrossCount = 0;
   let playerControl = STEP_LEFT;
+  let controlQueue = [];
 
   let buffTimer = 0;
   let buffAppear = 150;
@@ -106,6 +111,7 @@
   let playtime = 0;
   let lastTimestamp = -1;
   let isGameOver = true;
+  let isOnSelectionScreen = true;
   let isPaused = false;
   let intervalControlNumber = -1;
 
@@ -129,6 +135,9 @@
       }
       buffTimer = 0;
     }
+
+    // Apply queued action
+    if (controlQueue.length > 0) playerControl = controlQueue.splice(0, 1)[0];
 
     // Move the player
     playerSteps.push(playerControl);
@@ -156,11 +165,13 @@
       // Add score
       playerScore += 4;
       playerGrowCount++;
+      updateScore();
     } else if (currentCell === BOARD_CROSSBUFF) {
       playerScore += 1;
       playerCrossCount++;
       playerGrowCount-=3;
       buffX = -1;
+      updateScore();
     }
 
     if (playerGrowCount <= 0) {
@@ -185,6 +196,28 @@
     playerTailX = (playerTailX + STEP_X[playerSteps[0]] + BOARD_WIDTH)%BOARD_WIDTH;
     playerTailY = (playerTailY + STEP_Y[playerSteps[0]] + BOARD_HEIGHT)%BOARD_HEIGHT;
     playerSteps.splice(0,1);
+  }
+
+  function updateScore() {
+    switch(playerMilestone) {
+      case 0:
+        if (playerScore >= 150) {
+          snakeBoard.classList.toggle("milestone-150", true);
+          playerMilestone = 150;
+        }
+      case 150:
+        if (playerScore >= 500) {
+          snakeBoard.classList.toggle("milestone-150", false);
+          snakeBoard.classList.toggle("milestone-500", true);
+          playerMilestone = 150;
+        }
+      case 500:
+        if (playerScore >= 500) {
+          snakeBoard.classList.toggle("milestone-500", false);
+          snakeBoard.classList.toggle("milestone-1000", true);
+          playerMilestone = 1000;
+        }
+    }
   }
 
   function updateDivs() {
@@ -229,6 +262,7 @@
       titleH.innerText = "New Highscore!";
       localStorage.setItem("snake-highscore", highScore);
     }
+    gameMessageDiv.innerText = "Game over! Press SPACE to choose the level, or R to restart.";
   }
   function togglePause() {
     if (isGameOver) return;
@@ -257,6 +291,7 @@
     playerTailX = playerX;
     playerTailY = playerY;
     playerScore = 0;
+    playerMilestone = 0;
     playerGrowCount = 1;
     playerCrossCount = 0;
     playerControl = STEP_LEFT;
@@ -270,11 +305,17 @@
     // Generate food randomly
     let coords = returnBlankCell();
     BOARD_GRID[coords[1]][coords[0]] = BOARD_FOOD;
+    // Add the interval function
     intervalControlNumber = setInterval(updateGame, 1/GAME_PERIOD * 1000);
+    // Update UI elements
     titleH.innerText = "Snake";
-    highScoreDiv.innerText = highScore.toString().padStart(2, "\xa0");
+    highScoreDiv.innerText = highScore;
+    snakeBoard.classList.toggle("milestone-150", false);
+    snakeBoard.classList.toggle("milestone-500", false);
+    snakeBoard.classList.toggle("milestone-1000", false);
     playtimeDiv.innerText = "0s";
     lastTimestamp = Date.now();
+    gameMessageDiv.innerText = "";
   }
 
   function toReadableTime(timestamp) {
@@ -289,22 +330,31 @@
   }
 
   function gameInput(code) {
-    let currentControl = playerSteps.length>0?playerSteps[playerSteps.length-1]:playerControl;
+    let currentControl = playerControl, toQueue;
+
+    if (controlQueue.length > 0) currentControl = controlQueue[controlQueue.length-1];
+    else if (playerSteps.length > 0) currentControl = playerSteps[playerSteps.length-1];
+
     if (code === "KeyW" || code === "ArrowUp") {
-      playerControl = STEP_UP;
+      toQueue = STEP_UP;
     } else if (code === "KeyA" || code === "ArrowLeft") {
-      playerControl = STEP_LEFT;
+      toQueue = STEP_LEFT;
     } else if (code === "KeyS" || code === "ArrowDown") {
-      playerControl = STEP_DOWN;
+      toQueue = STEP_DOWN;
     } else if (code === "KeyD" || code === "ArrowRight") {
-      playerControl = STEP_RIGHT;
+      toQueue = STEP_RIGHT;
     } else if (code === "KeyR") {
       gameOver();
       newGame();
+      return true;
     } else if (code === "Space") {
       togglePause();
+      return true;
     } else return false;
-    if (playerControl === STEP_OPPOSITE[currentControl]) playerControl = currentControl;
+    if (controlQueue.length < 3) {
+      if (toQueue === STEP_OPPOSITE[currentControl]) toQueue = currentControl;
+      controlQueue.push(toQueue);
+    }
     return true;
   }
 
@@ -328,5 +378,5 @@
   },);
 
   updateDivs();
-  highScoreDiv.innerText = highScore.toString().padStart(2, "\xa0");
+  highScoreDiv.innerText = highScore;
 }

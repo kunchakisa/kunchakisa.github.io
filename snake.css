@@ -49,12 +49,14 @@
 #game-content .game-table th {
   font-size: 0.8em;
 }
-#game-content textarea {
+#game-content #game-message {
   font-size: 0.8em;
   border: none;
   overflow-y: hidden;
+  margin: auto;
   resize: none;
   width: 400px;
+  height: 50px;
   text-align: center;
   background-color: unset;
   color: var(--bs-dark);
