@@ -36,10 +36,138 @@
 
   let bigScreenSize = window.innerWidth > 600;
 
+  // Define directions
+  const STEP_LEFT = 0;
+  const STEP_RIGHT = 1;
+  const STEP_UP = 2;
+  const STEP_DOWN = 3;
+  const STEP_OPPOSITE = [1, 0, 3, 2];
+  const STEP_X = [-1, 1, 0, 0];
+  const STEP_Y = [0, 0, -1, 1];
+  // Rate of how fast the snake shrinks if it needs to
+  const SHRINK_SPEED = 1;
+  // Frames per seconds
+  const GAME_PERIOD = 8;
+
+  // Predefine stages
+  const STAGES = [
+    {
+      name: "Box",
+      grid: [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      ],
+      posX: 20,
+      posY: 10,
+      control: STEP_LEFT,
+    },
+    {
+      name: "Space",
+      grid: [
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      ],
+      posX: 20,
+      posY: 10,
+      control: STEP_LEFT,
+    },
+    {
+      name: "Camera",
+      grid: [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      ],
+      posX: 20,
+      posY: 2,
+      control: STEP_LEFT,
+    },
+    {
+      name: "The Grid",
+      grid: [
+        [1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
+        [1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
+        [0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0],
+        [0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0],
+        [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1],
+        [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1],
+        [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],
+        [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+        [0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+        [1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
+        [1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
+        [0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0],
+        [0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0],
+        [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1],
+        [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1],
+        [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],
+        [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+        [0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+      ],
+      posX: 18,
+      posY: 13,
+      control: STEP_UP,
+    },
+  ]
+
   // Populate the screen with the div grid
   const BOARD_WIDTH = 40;
   const BOARD_HEIGHT = 20;
-  const BOARD_GRID = [];
   const BOARD_DIV = [];
   const BOARD_BLOCK = 1;
   const BOARD_FREE = 0;
@@ -49,6 +177,10 @@
   const BOARD_CROSSBUFF = 5;
   const BOARD_SHRINKBUFF = 6;
   const BOARD_RISKYBUFF = 7;
+  const BOARD_GRID = [];
+  for (let y=0;y<BOARD_HEIGHT;y++) BOARD_GRID[y] = Array(BOARD_WIDTH).fill(0);
+
+  // Create the div elements inside the board
   for (let y=0; y<BOARD_HEIGHT; y++) {
     let row = [];
     for (let x=0; x<BOARD_WIDTH; x++) {
@@ -63,32 +195,9 @@
     snakeBoard.append(document.createElement("br"));
     BOARD_DIV.push(row);
   }
-  // Define the board obstacle
-  for (let y=0; y<BOARD_HEIGHT; y++) {
-    let row = [];
-    for (let x=0; x<BOARD_WIDTH; x++) {
-      let elem = BOARD_FREE;
-      if ( (y==0 || y==BOARD_HEIGHT-1) && (x < 18 || x > 22) )
-        elem = BOARD_BLOCK;
-      else if ( (x==0 || x==BOARD_WIDTH-1) && (y < 8 || y > 12) )
-        elem = BOARD_BLOCK;
-      else if (Math.pow(x-BOARD_WIDTH/2, 2)+Math.pow(y-BOARD_HEIGHT/2, 2) <= 7)
-        elem = BOARD_BLOCK;
-      row.push(elem);
-    }
-    BOARD_GRID.push(row);
-  }
 
-  const STEP_LEFT = 0;
-  const STEP_RIGHT = 1;
-  const STEP_UP = 2;
-  const STEP_DOWN = 3;
-  const STEP_OPPOSITE = [1, 0, 3, 2];
-  const STEP_X = [-1, 1, 0, 0];
-  const STEP_Y = [0, 0, -1, 1];
-  const SHRINK_SPEED = 1;
-  const GAME_PERIOD = 8;
-
+  // Game variables
+  let selectedLevel = parseInt(localStorage.getItem("snake-selectedlevel") | "0")
   let playerSteps = [];
   let playerX = 20;
   let playerY = 6;
@@ -96,7 +205,7 @@
   let playerTailY = playerY;
   let playerScore = 0;
   let playerMilestone = 0;
-  let highScore = parseInt(localStorage.getItem("snake-highscore") | "0");
+  let highScore;
   let playerGrowCount = 1;
   let playerCrossCount = 0;
   let playerControl = STEP_LEFT;
@@ -260,7 +369,7 @@
       highScore = playerScore;
       highScoreDiv.innerText = highScore.toString().padStart(2, "\xa0");
       titleH.innerText = "New Highscore!";
-      localStorage.setItem("snake-highscore", highScore);
+      localStorage.setItem("snake-highscore-"+selectedLevel, highScore);
     }
     gameMessageDiv.innerText = "Game over! Press SPACE to choose the level, or R to restart.";
   }
@@ -285,16 +394,15 @@
   function newGame () {
     isGameOver = false;
     isPaused = false;
+    isOnSelectionScreen = false;
+    loadLevel();
     playerSteps = [];
-    playerX = 20;
-    playerY = 2;
     playerTailX = playerX;
     playerTailY = playerY;
     playerScore = 0;
     playerMilestone = 0;
     playerGrowCount = 1;
     playerCrossCount = 0;
-    playerControl = STEP_LEFT;
     playtime = 0;
     buffTimer = 0;
     for (let y=0; y<BOARD_HEIGHT; y++) {
@@ -330,32 +438,83 @@
   }
 
   function gameInput(code) {
-    let currentControl = playerControl, toQueue;
-
-    if (controlQueue.length > 0) currentControl = controlQueue[controlQueue.length-1];
-    else if (playerSteps.length > 0) currentControl = playerSteps[playerSteps.length-1];
-
-    if (code === "KeyW" || code === "ArrowUp") {
-      toQueue = STEP_UP;
-    } else if (code === "KeyA" || code === "ArrowLeft") {
-      toQueue = STEP_LEFT;
-    } else if (code === "KeyS" || code === "ArrowDown") {
-      toQueue = STEP_DOWN;
-    } else if (code === "KeyD" || code === "ArrowRight") {
-      toQueue = STEP_RIGHT;
-    } else if (code === "KeyR") {
-      gameOver();
-      newGame();
+    if (isGameOver && isOnSelectionScreen) {
+      // Be able to choose the level
+      if (code === "KeyA" || code === "ArrowLeft") {
+        selectedLevel = Math.max(0, Math.min(STAGES.length-1, selectedLevel-1));
+      } else if (code === "KeyD" || code === "ArrowRight") {
+        selectedLevel = Math.max(0, Math.min(STAGES.length-1, selectedLevel+1));
+      } else if (code === "KeyR") {
+        newGame();
+        return true;
+      } else return false;
+      localStorage.setItem("snake-selectedlevel", selectedLevel);
+      loadLevel();
+      updateLevelName();
       return true;
-    } else if (code === "Space") {
-      togglePause();
+    } else if (isGameOver) {
+      if (code === "KeyR") {
+        newGame();
+      } else if (code === "Space") {
+        newGame();
+        gameOver();
+        isOnSelectionScreen = true;
+        loadLevel();
+        updateLevelName();
+      } else return false;
       return true;
-    } else return false;
-    if (controlQueue.length < 3) {
-      if (toQueue === STEP_OPPOSITE[currentControl]) toQueue = currentControl;
-      controlQueue.push(toQueue);
+    } else {
+      let currentControl = playerControl, toQueue;
+
+      if (controlQueue.length > 0) currentControl = controlQueue[controlQueue.length-1];
+      else if (playerSteps.length > 0) currentControl = playerSteps[playerSteps.length-1];
+  
+      if (code === "KeyW" || code === "ArrowUp") {
+        toQueue = STEP_UP;
+      } else if (code === "KeyA" || code === "ArrowLeft") {
+        toQueue = STEP_LEFT;
+      } else if (code === "KeyS" || code === "ArrowDown") {
+        toQueue = STEP_DOWN;
+      } else if (code === "KeyD" || code === "ArrowRight") {
+        toQueue = STEP_RIGHT;
+      } else if (code === "KeyR") {
+        gameOver();
+        newGame();
+        return true;
+      } else if (code === "Space") {
+        togglePause();
+        return true;
+      } else return false;
+      if (!isPaused && controlQueue.length < 3) {
+        if (toQueue === STEP_OPPOSITE[currentControl]) toQueue = currentControl;
+        controlQueue.push(toQueue);
+      }
+      return true;
     }
-    return true;
+  }
+
+  function loadLevel() {
+    highScore = parseInt(localStorage.getItem("snake-highscore-"+selectedLevel) | "0");
+    highScoreDiv.innerText = highScore;
+    clearGrid();
+    updateDivs();
+  }
+
+  function updateLevelName() {
+    gameMessageDiv.innerText = "["+STAGES[selectedLevel].name+"]\nWelcome to snake! Press AD/Arrows to switch levels.";
+  }
+
+  function clearGrid() {
+    // Update the board_grid
+    let selectedStage = STAGES[selectedLevel];
+    playerX = selectedStage.posX;
+    playerY = selectedStage.posY;
+    playerControl = selectedStage.control;
+    for (let y=0; y<BOARD_HEIGHT; y++) {
+      for(let x=0; x<BOARD_WIDTH; x++) {
+        BOARD_GRID[y][x] = selectedStage.grid[y][x];
+      }
+    }
   }
 
   document.addEventListener("keydown", (event) => {
@@ -375,8 +534,8 @@
         }
       }
     }
-  },);
+  });
 
-  updateDivs();
-  highScoreDiv.innerText = highScore;
+  loadLevel();
+  updateLevelName();
 }

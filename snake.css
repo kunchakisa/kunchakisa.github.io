@@ -63,7 +63,7 @@
 }
 #game-board {
   font-size: 0;
-  transition: background-color 1s;
+  transition: background-color 1s, filter 1s;
   background-color: #fff;
 }
 #game-board.milestone-150 {
