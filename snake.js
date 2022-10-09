@@ -461,6 +461,7 @@
         isOnSelectionScreen = true;
         loadLevel();
         updateLevelName();
+        titleH.innerText = "Snake";
       } else return false;
       return true;
     } else {
