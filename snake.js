@@ -32,7 +32,7 @@
     });
     // Get from local storage if the user opened the controls last session
     let isControlsShown = localStorage.getItem("game-iscontrolsshown");
-    if (!(typeof isControlsShown === "undefined" || isControlsShown === "false")) {
+    if (!(isControlsShown === null || isControlsShown === "false")) {
       clickFunction();
     } 
   }
