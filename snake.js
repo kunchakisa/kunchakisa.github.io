@@ -212,7 +212,7 @@
           playerMilestone = 150;
         }
       case 500:
-        if (playerScore >= 500) {
+        if (playerScore >= 1000) {
           snakeBoard.classList.toggle("milestone-500", false);
           snakeBoard.classList.toggle("milestone-1000", true);
           playerMilestone = 1000;
