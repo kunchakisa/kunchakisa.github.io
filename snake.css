@@ -36,10 +36,14 @@
   display: inline-block;
   vertical-align: middle;
 }
+#game-content .game-table th, #game-content .game-table td {
+  padding: 2px;
+  text-align: center;
+}
 #game-content .game-table span {
   font-family: monospace;
   display: inline-block;
-  width: 120px;
+  width: 100px;
   font-size: 0.9em;
 }
 #game-content .game-table th {

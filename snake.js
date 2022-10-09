@@ -211,10 +211,10 @@
       }
     }
 
-    scoreCountDiv.innerText = playerScore.toString().padStart(2, "\xa0");
-    playerCountDiv.innerText = playerSteps.length.toString().padStart(2, "\xa0");
-    crossCountDiv.innerText = playerCrossCount.toString().padStart(2, "\xa0");
-    buffTimerDiv.innerText = buffTimer.toString().padStart(3, "\xa0");
+    scoreCountDiv.innerText = playerScore;
+    playerCountDiv.innerText = playerSteps.length;
+    crossCountDiv.innerText = playerCrossCount;
+    buffTimerDiv.innerText = buffTimer;
     playtimeDiv.innerText = toReadableTime(playtime);
   }
 
