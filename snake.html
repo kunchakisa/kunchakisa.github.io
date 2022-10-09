@@ -36,8 +36,55 @@
       </div>
     </nav>
 
-    <div id="game-content">
-
+    <div id="game-content" class="mt-5 p-3 bg-white text-center">
+      <p id="game-title" class="h3 text-center">Snake</p>
+      <table class="game-table w-auto table table-sm table-responsive table-borderless mx-auto">
+        <tr>
+          <th>Score</th>
+          <th>High</th>
+          <th>Time</th>
+        </tr>
+        <tr>
+          <td><span id="game-score">0</span></td>
+          <td><span id="game-highscore">0</span></td>
+          <td><span id="game-playtime">0s</span></td>
+        </tr>
+      </table>
+      <div>
+        <div id="game-board" class="my-1 border border-2 rounded-2 border-dark p-3 text-center text-nowrap d-inline-block"></div>
+      </div>
+      <textarea class="my-2" readonly disabled rows="3">
+        Welcome to snake! Press R to start!
+      </textarea>
+      <table class="game-table w-auto table table-sm table-responsive table-borderless mx-auto">
+        <tr>
+          <th>Snake Length</th>
+          <th>Cross Buffs</th>
+          <th>Buff Clock</th>
+        </tr>
+        <tr>
+          <td><span id="game-snakelength">0</span></td>
+          <td><span id="game-crossbuffs">0</span></td>
+          <td><span id="game-bufftimer">0</span></td>
+        </tr>
+      </table>
+      <hr>
+      <p class="h3">Controls</p>
+      <table class="table w-auto table-responsive table-borderless mx-auto">
+        <tr>
+          <th>Move</th>
+          <td>WASD or Arrows</td>
+        </tr>
+        <tr>
+          <th>Pause</th>
+          <td>Space</td>
+        </tr>
+        <tr>
+          <th>Reset</th>
+          <td>R</td>
+        </tr>
+      </table>
+      <button id="game-showcontrols" class="btn btn-primary bg-primary border-primary">Show on-screen controls</button>
     </div>
 
     <div id="snake-controller">

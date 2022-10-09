@@ -1,55 +1,27 @@
 {
   let gameDiv = document.getElementById("game-content");
   let snakeControllerDiv = document.getElementById("snake-controller");
-  gameDiv.classList.add("mt-5", "p-3", "bg-white", "text-center");
-  let titleH = document.createElement("h3");
-  titleH.classList.add("text-center")
-  titleH.innerText = "Snake";
-  gameDiv.append(titleH);
-  let firstScoreDiv = document.createElement("div");
-  firstScoreDiv.classList.add("text-center");
-  firstScoreDiv.style.fontFamily = "monospace";
-  gameDiv.append(firstScoreDiv);
-  let snakeBoard = document.createElement("div");
-  snakeBoard.classList.add("mt-2", "border", "border-2", "rounded-2", "border-dark", "p-3", "text-center");
-  snakeBoard.style.whiteSpace = "nowrap";
-  snakeBoard.style.display = "inline-block";
-  snakeBoard.style.fontSize = "0px";
-  gameDiv.append(snakeBoard);
-  let scoreDiv = document.createElement("div");
-  scoreDiv.classList.add("text-center");
-  scoreDiv.style.fontFamily = "monospace";
-  let scoreCountDiv = document.createElement("span");
-  scoreCountDiv.innerText = "0";
-  let highScoreDiv = document.createElement("span");
-  highScoreDiv.innerText = " 0";
-  let playerCountDiv = document.createElement("span");
-  playerCountDiv.innerText = "0";
-  let crossCountDiv = document.createElement("span");
-  crossCountDiv.innerText = "0";
-  let buffTimerDiv = document.createElement("span");
-  buffTimerDiv.innerText = "0";
-  firstScoreDiv.append("Score:\xa0", scoreCountDiv, ", High:\xa0", highScoreDiv);
-  scoreDiv.append("Length:\xa0", playerCountDiv,
-    ", Cross:\xa0", crossCountDiv, ", BT:\xa0", buffTimerDiv,
-    
-    document.createElement("br"),
-    document.createElement("br"),
-    "CONTROLS:",document.createElement("br"),
-    "WASD/Arrows - Move",document.createElement("br"),
-    "R - Restart",document.createElement("br"),
-    "Space - Pause");
-  gameDiv.append(scoreDiv);
-  let showControlsButton = document.createElement("button");
-  showControlsButton.classList.add("btn", "btn-primary", "bg-primary", "border-primary");
-  showControlsButton.innerText = "Show Touch Controls";
+  let titleH = document.getElementById("game-title");
+  let snakeBoard = document.getElementById("game-board");
+  let scoreCountDiv = document.getElementById("game-score");
+  let highScoreDiv = document.getElementById("game-highscore");
+  let playerCountDiv = document.getElementById("game-snakelength");
+  let crossCountDiv = document.getElementById("game-crossbuffs");
+  let buffTimerDiv = document.getElementById("game-bufftimer");
+  let playtimeDiv = document.getElementById("game-playtime");
+
+  let showControlsButton = document.getElementById("game-showcontrols");
   showControlsButton.addEventListener("mousedown", (event)=>{
     event.preventDefault();
-    if (snakeControllerDiv.style.display === "none")
+    if (snakeControllerDiv.style.display === "") {
       snakeControllerDiv.style.display = "initial";
-    else snakeControllerDiv.style.display = "none";
+      showControlsButton.innerText = "Hide on-screen controls";
+    } else {
+      snakeControllerDiv.style.display = "";
+      showControlsButton.innerText = "Show on-screen controls";
+    }
   });
-  gameDiv.append(showControlsButton);
+  
   // Set up controls button and add event listeners
   {
     let query = snakeControllerDiv.querySelectorAll(".ctrl");
@@ -131,6 +103,8 @@
   let buffX = -1;
   let buffY = -1;
 
+  let playtime = 0;
+  let lastTimestamp = -1;
   let isGameOver = true;
   let isPaused = false;
   let intervalControlNumber = -1;
@@ -138,6 +112,10 @@
   function updateGame () {
     if (isGameOver) return;
     if (isPaused) return;
+    // Update play time
+    let now = Date.now();
+    playtime += (now - lastTimestamp)/1000;
+    lastTimestamp = now;
     // Update buff timer
     buffTimer++;
     if (buffTimer===buffAppear) {
@@ -197,6 +175,7 @@
 
     updateDivs();
   }
+
   function moveTail() {
     // Move the tail, and remove player trail
     let currentCell = BOARD_GRID[playerTailY][playerTailX];
@@ -207,28 +186,27 @@
     playerTailY = (playerTailY + STEP_Y[playerSteps[0]] + BOARD_HEIGHT)%BOARD_HEIGHT;
     playerSteps.splice(0,1);
   }
+
   function updateDivs() {
     for (let y=0; y<BOARD_HEIGHT; y++) {
       for (let x=0; x<BOARD_WIDTH; x++) {
-        currentCell = BOARD_GRID[y][x];
-        BOARD_DIV[y][x].style.backgroundColor = "#fff";
-        BOARD_DIV[y][x].style.border = "";
+        let currentCell = BOARD_GRID[y][x];
+        let currentCellDiv = BOARD_DIV[y][x];
+        currentCellDiv.className = "";
         if (currentCell === BOARD_BLOCK) {
-          BOARD_DIV[y][x].style.backgroundColor = "#000";
+          currentCellDiv.classList.add("board-block");
         } else if (currentCell === BOARD_FOOD) {
-          BOARD_DIV[y][x].style.backgroundColor = "#2a2";
-          BOARD_DIV[y][x].style.border = "2px solid #0f0";
+          currentCellDiv.classList.add("board-food");
         } else if (currentCell === BOARD_PLAYER_1) {
-          BOARD_DIV[y][x].style.backgroundColor = "#88e";
+          currentCellDiv.classList.add("board-player");
         } else if (currentCell === BOARD_PLAYER_2) {
-          BOARD_DIV[y][x].style.backgroundColor = "#33a";
+          currentCellDiv.classList.add("board-player2");
         } else if (currentCell === BOARD_CROSSBUFF) {
-          BOARD_DIV[y][x].style.backgroundColor = "#5c5";
-          BOARD_DIV[y][x].style.border = "2px solid #ff0";
+          currentCellDiv.classList.add("board-crossbuff");
         }
         // Add border to snake head
         if (playerX == x && playerY == y) {
-          BOARD_DIV[y][x].style.border = "2px solid #117";
+          currentCellDiv.classList.add("board-playerhead");
         } 
       }
     }
@@ -237,7 +215,9 @@
     playerCountDiv.innerText = playerSteps.length.toString().padStart(2, "\xa0");
     crossCountDiv.innerText = playerCrossCount.toString().padStart(2, "\xa0");
     buffTimerDiv.innerText = buffTimer.toString().padStart(3, "\xa0");
+    playtimeDiv.innerText = toReadableTime(playtime);
   }
+
   function gameOver() {
     if (isGameOver) return;
     isGameOver = true;
@@ -254,8 +234,12 @@
     if (isGameOver) return;
     isPaused = !isPaused;
     if (isPaused) titleH.innerText = "Paused";
-    else titleH.innerText = "Snake";
+    else {
+      titleH.innerText = "Snake";
+      lastTimestamp = Date.now();
+    }
   }
+
   function returnBlankCell() {
     while(true) {
       let x = Math.floor(Math.random()*BOARD_WIDTH);
@@ -263,6 +247,7 @@
       if (BOARD_GRID[y][x] === BOARD_FREE) return [x, y];
     }
   }
+
   function newGame () {
     isGameOver = false;
     isPaused = false;
@@ -275,6 +260,7 @@
     playerGrowCount = 1;
     playerCrossCount = 0;
     playerControl = STEP_LEFT;
+    playtime = 0;
     buffTimer = 0;
     for (let y=0; y<BOARD_HEIGHT; y++) {
       for (let x=0; x<BOARD_WIDTH; x++) {
@@ -287,7 +273,21 @@
     intervalControlNumber = setInterval(updateGame, 1/GAME_PERIOD * 1000);
     titleH.innerText = "Snake";
     highScoreDiv.innerText = highScore.toString().padStart(2, "\xa0");
+    playtimeDiv.innerText = "0s";
+    lastTimestamp = Date.now();
   }
+
+  function toReadableTime(timestamp) {
+    if (timestamp >= 3600) {
+      return Math.floor(timestamp/3600).toString()
+        + ":" + Math.floor((timestamp/60)%60).toString().padStart(2, "0")
+        + ":" + Math.floor((timestamp)%60).toString().padStart(2, "0");
+    } else if (timestamp > 60) {
+      return Math.floor(timestamp/60).toString()
+      + ":" + Math.floor((timestamp)%60).toString().padStart(2, "0");
+    } else return Math.floor(timestamp) + "s";
+  }
+
   function gameInput(code) {
     let currentControl = playerSteps.length>0?playerSteps[playerSteps.length-1]:playerControl;
     if (code === "KeyW" || code === "ArrowUp") {
@@ -327,6 +327,6 @@
     }
   },);
 
-  newGame();
   updateDivs();
+  highScoreDiv.innerText = highScore.toString().padStart(2, "\xa0");
 }

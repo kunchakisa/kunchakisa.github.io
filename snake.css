@@ -36,3 +36,59 @@
   display: inline-block;
   vertical-align: middle;
 }
+#game-content .game-table span {
+  font-family: monospace;
+  display: inline-block;
+  width: 120px;
+  font-size: 0.9em;
+}
+#game-content .game-table th {
+  font-size: 0.8em;
+}
+#game-content textarea {
+  font-size: 0.8em;
+  border: none;
+  overflow-y: hidden;
+  resize: none;
+  width: 400px;
+  text-align: center;
+  background-color: unset;
+  color: var(--bs-dark);
+}
+#game-board {
+  font-size: 0;
+  transition: background-color 1s;
+  background-color: #fff;
+}
+#game-board.milestone-150 {
+  background-color: #ccf;
+}
+#game-board.milestone-500 {
+  filter: invert();
+}
+#game-board.milestone-1000 {
+  filter: invert();
+  background-color: #0cc;
+}
+#game-board div {
+  display: inline-block;
+}
+.board-block {
+  background-color: #000;
+}
+.board-player {
+  background-color: #88f;
+}
+.board-player2 {
+  background-color: #77b;
+}
+.board-food {
+  background-color: #7d7;
+}
+.board-crossbuff {
+  background-color: #f00;
+  border: 2px solid #9e9;
+}
+.board-playerhead {
+  border: 2px solid #009;
+}
