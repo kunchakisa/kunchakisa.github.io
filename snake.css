@@ -19,10 +19,8 @@
   position: relative;
   text-align: center;
   user-select: none;
+  cursor: pointer;
   background-color: var(--bs-primary-lightest);
-}
-#snake-controller > div > div:hover {
-  background-color: white;
 }
 #snake-controller > div > div::before {
   content: "";

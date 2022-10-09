@@ -1,5 +1,5 @@
 // Establish a cache name
-const cacheName = 'website_v1.0.0';
+const cacheName = 'website_v1.0.2';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(cacheName);
@@ -42,16 +42,18 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Open the cache
-  event.respondWith(caches.open(cacheName).then((cache) => {
-    // Go to the network first
-    return fetch(event.request.url).then((fetchedResponse) => {
-      cache.put(event.request, fetchedResponse.clone());
+  if (event.request.mode === "navigate") {
+    // Open the cache
+    event.respondWith(caches.open(cacheName).then((cache) => {
+      // Go to the network first
+      return fetch(event.request.url).then((fetchedResponse) => {
+        cache.put(event.request, fetchedResponse.clone());
 
-      return fetchedResponse;
-    }).catch(() => {
-      // If the network is unavailable, get
-      return cache.match(event.request.url);
-    });
-  }));
+        return fetchedResponse;
+      }).catch(() => {
+        // If the network is unavailable, get
+        return cache.match(event.request.url);
+      });
+    }));
+  }
 });

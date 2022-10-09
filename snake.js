@@ -13,6 +13,7 @@
 
   // Add show control logic
   let showControlsButton = document.getElementById("game-showcontrols");
+  let controlsMoveTriggerableEnabled = false;
 
   {
     function clickFunction() {
@@ -40,12 +41,23 @@
   // Set up controls button and add event listeners
   {
     let query = snakeControllerDiv.querySelectorAll(".ctrl");
+    let mouseDown = false;
     snakeControllerDiv.addEventListener('touchstart', (event) => clickFunction(event, true));
+    snakeControllerDiv.addEventListener('mousedown', (event) => {
+      mouseDown = true;
+      clickFunction(event, true, true);
+      event.preventDefault();
+    });
     snakeControllerDiv.addEventListener('touchmove', (event) => clickFunction(event, false));
+    snakeControllerDiv.addEventListener('mousemove', (event) => clickFunction(event, false, true));
+    snakeControllerDiv.addEventListener('mouseup', () => mouseDown = false);
     snakeControllerDiv.addEventListener('touchcancel', (e) => e.preventDefault());
-    function clickFunction(event, isTouchStart) {
-      let x = event.touches[0].clientX;
-      let y = event.touches[0].clientY;
+    snakeControllerDiv.addEventListener('mouseout', (e) => e.preventDefault());
+    function clickFunction(event, isTouchStart, isMouse = false) {
+      let x = event?.touches?.[0].clientX || event?.clientX;
+      let y = event?.touches?.[0].clientY || event?.clientY;
+      if (isMouse && !mouseDown) return;
+      if (!(controlsMoveTriggerableEnabled || isTouchStart)) return;
       for (let elem of query) {
         let elemPos = elem.getBoundingClientRect();
         if (elemPos.left <= x && x <= elemPos.right && elemPos.top <= y && elemPos.bottom >= y) {
@@ -396,6 +408,8 @@
       localStorage.setItem("snake-highscore-"+selectedLevel, highScore);
     }
     gameMessageDiv.innerText = "Game over! Press SPACE to choose the level, or R to restart.";
+    // Enable control move triggers
+    controlsMoveTriggerableEnabled = false;
   }
   function togglePause() {
     if (isGameOver) return;
@@ -448,6 +462,8 @@
     playtimeDiv.innerText = "0s";
     lastTimestamp = Date.now();
     gameMessageDiv.innerText = "";
+    // Enable control move triggers
+    controlsMoveTriggerableEnabled = true;
   }
 
   function toReadableTime(timestamp) {
