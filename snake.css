@@ -9,7 +9,6 @@
   touch-action: none;
 }
 #snake-controller > div > div {
-  margin: 4px;
   width: 64px;
   height: 64px;
   font-size: 20px;

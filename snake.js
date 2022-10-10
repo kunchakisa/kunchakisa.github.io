@@ -42,7 +42,10 @@
   {
     let query = snakeControllerDiv.querySelectorAll(".ctrl");
     let mouseDown = false;
-    snakeControllerDiv.addEventListener('touchstart', (event) => clickFunction(event, true));
+    snakeControllerDiv.addEventListener('touchstart', (event) => {
+      clickFunction(event, true);
+      event.preventDefault();
+    });
     snakeControllerDiv.addEventListener('mousedown', (event) => {
       mouseDown = true;
       clickFunction(event, true, true);
