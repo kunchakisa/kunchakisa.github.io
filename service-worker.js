@@ -1,9 +1,10 @@
 // Establish a cache name
-const cacheName = 'website_v1.0.2';
+const cacheName = 'website_v1.0.3';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(cacheName);
   await cache.addAll(resources);
+  self.skipWaiting();
 };
 
 self.addEventListener("install", (event) => {
