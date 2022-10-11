@@ -59,8 +59,8 @@ body {
   text-shadow: none;
 }
 
-.opacity-10 {
-  opacity: .10 !important;
+.opacity-5 {
+  opacity: .05 !important;
 }
 
 #about-section {
@@ -138,6 +138,12 @@ body {
     border-bottom-left-radius: 8px;
     border-top-right-radius: unset;
     width: 100%;
+  }
+  .eno-small-md-down {
+    font-size: 0.5em;
+  }
+  .eno-p-md-down-0 {
+    padding: 0;
   }
 }
 
