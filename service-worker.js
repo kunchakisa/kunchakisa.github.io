@@ -1,5 +1,5 @@
 // Establish a cache name
-const cacheName = 'website_v1.0.4_002';
+const cacheName = 'website_v1.0.4_003';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(cacheName);
@@ -18,6 +18,8 @@ self.addEventListener("install", (event) => {
       "/secrets/snake.html",
       "/secrets/css/snake.css",
       "/secrets/js/snake.js",
+      "/secrets/prepostinfix.html",
+      "/secrets/js/prepostinfix.js",
 
       "/service-worker-registrar.js",
       "/img/bg-header.jpg",
