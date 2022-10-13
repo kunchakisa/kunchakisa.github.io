@@ -48,16 +48,38 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Open the cache
-  event.respondWith(caches.open(cacheName).then((cache) => {
-    // Go to the network first
-    return fetch(event.request.url).then((fetchedResponse) => {
-      cache.put(event.request, fetchedResponse.clone());
+  // If, request is an image
+  if (event.request.destination === 'image') {
+    event.respondWith(caches.open(cacheName).then((cache) => {
+      // Go to the cache first
+      return cache.match(event.request.url).then((cachedResponse) => {
+        // Return a cached response if we have one
+        if (cachedResponse) {
+          return cachedResponse;
+        }
 
-      return fetchedResponse;
-    }).catch(() => {
-      // If the network is unavailable, get
-      return cache.match(event.request.url);
-    });
-  }));
+        // Otherwise, hit the network
+        return fetch(event.request).then((fetchedResponse) => {
+          // Add the network response to the cache for later visits
+          cache.put(event.request, fetchedResponse.clone());
+
+          // Return the network response
+          return fetchedResponse;
+        });
+      });
+    }));
+  } else {
+    // Open the cache
+    event.respondWith(caches.open(cacheName).then((cache) => {
+      // Go to the network first
+      return fetch(event.request.url).then((fetchedResponse) => {
+        cache.put(event.request, fetchedResponse.clone());
+
+        return fetchedResponse;
+      }).catch(() => {
+        // If the network is unavailable, get
+        return cache.match(event.request.url);
+      });
+    }));
+  }
 });
