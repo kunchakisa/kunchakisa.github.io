@@ -82,6 +82,12 @@ function isOperatorCommutative(operator) {
   return false;
 }
 
+/**
+ * Launch function to convert infix to postfix
+ * @param {string} infixExpression - the infix expression that follows the spaced mode
+ * @param {{}} optionalResults 
+ * @returns {string | {}} - the postfix expression or the optionalResult if there's an error
+ */
 function toPostfix(infixExpression, spacedMode = false, optionalResults = {}) {
   let funcObj = {
     expr: infixExpression,
@@ -89,6 +95,7 @@ function toPostfix(infixExpression, spacedMode = false, optionalResults = {}) {
     output: "",
     optionalResults: optionalResults,
     spacedMode: spacedMode,
+    lastOutputType: "start",
   }
   optionalResults.status = "success";
   optionalResults.tallies = {
@@ -101,13 +108,14 @@ function toPostfix(infixExpression, spacedMode = false, optionalResults = {}) {
     return optionalResults;
   return funcObj.output;
 }
+
+// Recursion function of postfix
+// Called at the start of the input, and every start
+// of every clauses
+// RETURNS the minimum precedence of the operator of the clause
+// RETURNS -1 if there's just one operand
+// RETURNS -2 if there's an error
 function toPostfixI(fo, depth = 0) {
-  // recursion function, returns the minimum precedence of the clause
-  // returns -1 if the clause is just a single operand
-  // returns -2 if there's an error that occured
-  // Can also return the precedence of the operator
-  // returns -1 if the clause just closed with a parenthesis
-  // returns -2 if there's an error
   let minimumPrecedence = -1;
   let lastClauseMinimumPrecedence = -1;
   let operatorStack = new ArrayStack();
@@ -141,8 +149,8 @@ function toPostfixI(fo, depth = 0) {
         if (fo.spacedMode) {
           let start = fo.i;
           let end = getWholeOperand(fo);
-          addToOutput(fo, fo.expr.substring(start, end));
-        } else addToOutput(fo, to);
+          addToOutput(fo, fo.expr.substring(start, end), "operand");
+        } else addToOutput(fo, to, "operand");
         lastClauseMinimumPrecedence = -1;
       } else {
         // operand input received in mode 0
@@ -232,6 +240,17 @@ function toPostfixI(fo, depth = 0) {
   return minimumPrecedence;
 }
 
+// ===================================
+//  Utility functions
+// ===================================
+
+/**
+ * Utility: Check infix 
+ * @param {{}} fo - function object 
+ * @param {*} operatorStack 
+ * @param {*} lastClauseMinimumPrecedence 
+ * @param {*} precedence 
+ */
 function postfixCheckWarnings(fo, operatorStack, lastClauseMinimumPrecedence, precedence) {
   if (operatorStack.isEmpty()) {
     if (lastClauseMinimumPrecedence >= precedence) {
@@ -259,6 +278,8 @@ function postfixCheckWarnings(fo, operatorStack, lastClauseMinimumPrecedence, pr
     }
   }
 }
+
+// util: Get the index of the last character of an operand
 function getWholeOperand(fo) {
   for (; fo.i<fo.expr.length;fo.i++) {
     let to = fo.expr.charAt(fo.i);
@@ -269,13 +290,19 @@ function getWholeOperand(fo) {
   return fo.i--;
 }
 
+// util: Append the operatorStack to the string output
+// Used in postfix conversion
 function addOperatorStackToOutput(fo,  operatorStack, precedence = -1) {
   while (!operatorStack.isEmpty() && operatorStack.peek().precedence >= precedence)
-    addToOutput(fo, operatorStack.pop().operator);
+    addToOutput(fo, operatorStack.pop().operator, "operator");
 }
-function addToOutput(fo, toAdd) {
-  if (!fo.spacedMode || fo.output.length === 0) fo.output += toAdd;
+
+// util: Append to the text to the output with regards
+// to spacedMode
+function addToOutput(fo, toAdd, outputType) {
+  if (!fo.spacedMode || fo.lastOutputType === "start" || !(fo.lastOutputType === "operand" && fo.lastOutputType === outputType)) fo.output += toAdd;
   else fo.output += " " + toAdd;
+  fo.lastOutputType = outputType;
 }
 
 class ArrayStack {
