@@ -1,6 +1,6 @@
 "use strict"
 // Establish a cache name
-const cacheName = 'website_v1.0.4_003';
+const cacheName = 'website_v1.0.5_001';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(cacheName);
