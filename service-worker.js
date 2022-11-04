@@ -1,3 +1,4 @@
+"use strict"
 // Establish a cache name
 const cacheName = 'website_v1.0.4_003';
 

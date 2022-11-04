@@ -1,3 +1,4 @@
+"use strict"
 {
   let gameDiv = document.getElementById("game-content");
   let snakeControllerDiv = document.getElementById("snake-controller");
@@ -262,6 +263,9 @@
   let isOnSelectionScreen = true;
   let isPaused = false;
   let intervalControlNumber = -1;
+
+  console.log('playtime', playtime)
+  console.log('BOARD_DIV', BOARD_DIV)
 
   function updateGame () {
     if (isGameOver) return;

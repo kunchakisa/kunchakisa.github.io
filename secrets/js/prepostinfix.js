@@ -1,3 +1,4 @@
+"use strict"
 {
   let spacedModeInput = document.getElementById("option-spaced");
   let fieldInfix   = document.getElementById("field-infix");
