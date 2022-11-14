@@ -30,7 +30,7 @@ body {
 }
 
 .eno-bg-header {
-  background-image: url("img/bg-header.jpg");
+  background-image: url('img/bg-header.jpg');
   background-size: cover;
 }
 
@@ -51,7 +51,7 @@ body {
 }
 
 .eno-text-shadow-black {
-  text-shadow: 0 0 8px black, 0 0 8px black, 0 0 8px black, 0 0 8px black, 
+  text-shadow: 0 0 8px black, 0 0 8px black, 0 0 8px black, 0 0 8px black,
     0 0 8px black, 0 0 8px black, 0 0 8px black, 0 0 8px black;
 }
 
@@ -60,7 +60,7 @@ body {
 }
 
 .opacity-5 {
-  opacity: .05 !important;
+  opacity: 0.05 !important;
 }
 
 #about-section {
