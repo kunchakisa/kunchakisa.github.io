@@ -1,16 +1,16 @@
 window.numberToEnglish = (function () {
     let firstFewThousandsTerm = [
         'thousand',
-        'million',
-        'billion',
-        'trillion',
-        'quadrillion',
-        'quintillion',
-        'sextillion',
-        'septillion',
-        'octillion',
-        'nonillion',
-        'decillion',
+        'milli',
+        'billi',
+        'trilli',
+        'quadrilli',
+        'quintilli',
+        'sextilli',
+        'septilli',
+        'octilli',
+        'nonilli',
+        'decilli',
     ]
     let thousandsUnitTerms = [
         'un',
@@ -167,6 +167,13 @@ window.numberToEnglish = (function () {
                 message: 'Input number string is empty',
             }
         }
+        // Err if string length is over 3 quadrillion
+        if (input.length > 3_000_000_000_000_000) {
+            throw {
+                error: 'input_too_big',
+                message: 'Input number is too large',
+            }
+        }
         // Err if not all characters are numbers
         for (let i = input.length - 1; i >= 0; i--) {
             if (!isValidDigit(input, i)) {
@@ -195,14 +202,6 @@ window.numberToEnglish = (function () {
         // 4-6 has starting 0 thousands index
         // 7-9 has starting 1 thousands index
         let thousandsIndex = Math.floor((input.length - 1) / 3) - 1
-
-        // Throw error if thousandsIndex is above 1000
-        if (thousandsIndex > 1000) {
-            throw {
-                error: 'too_big',
-                message: 'Input number is too big',
-            }
-        }
 
         // i should start where the leftmost thousand separator
         // of number starts
@@ -254,79 +253,104 @@ window.numberToEnglish = (function () {
      * @param {number} thousandsIndex - number of zeroes/3 minus 3
      * @returns {string}
      */
-    function getThousandTerm(thousandsIndex) {
+    function getThousandTerm(thousandsIndex = -1) {
         // Edge cases
         if (thousandsIndex < 0) return ''
+        if (thousandsIndex == 0) return firstFewThousandsTerm[thousandsIndex]
         if (thousandsIndex <= 10) {
-            return firstFewThousandsTerm[thousandsIndex]
-        }
-        if (thousandsIndex === 1000) {
-            return 'millinillion'
+            return firstFewThousandsTerm[thousandsIndex] + 'on'
         }
         if (thousandsIndex === 16) {
             return 'sexdecillion'
         }
-        if (thousandsIndex > 1000) {
+        if (thousandsIndex >= Infinity) {
             throw {
                 error: 'too_big',
                 message: 'Thousands index is too big',
             }
         }
 
-        let hundreds = (Math.floor(thousandsIndex / 100) % 10) - 1
-        let tens = (Math.floor(thousandsIndex / 10) % 10) - 1
-        let unit = (thousandsIndex % 10) - 1
-        let hundredsString = ''
-        let tensString = ''
-        let unitString = ''
+        // Even the thousands term needs thousands index!
+        // But this time, we won't subtract 1 from the
+        // number of commas after the number
+        let commasThousandsIndex = Math.floor(Math.log10(thousandsIndex) / 3)
+        let result = ''
 
-        if (unit !== -1) {
-            let valueForNMXSLookup, NMXSLookup
-            let term1, term2
+        while (commasThousandsIndex >= 0) {
+            let thousandsThousandsGroup =
+                Math.floor(
+                    thousandsIndex / Math.pow(10, commasThousandsIndex-- * 3)
+                ) % 1000
+            let hundreds = (Math.floor(thousandsThousandsGroup / 100) % 10) - 1
+            let tens = (Math.floor(thousandsThousandsGroup / 10) % 10) - 1
+            let unit = (thousandsThousandsGroup % 10) - 1
+
+            // Edge case: all zeros
+            if (thousandsThousandsGroup === 0) {
+                result += 'nilli'
+                continue
+            }
+
+            let hundredsString = ''
+            let tensString = ''
+            let unitString = ''
+
+            if (unit !== -1) {
+                if (tens === -1 && hundreds === -1) {
+                    // Use the firstFewThousands array
+                    result += firstFewThousandsTerm[unit + 1]
+                    continue
+                } else {
+                    let valueForNMXSLookup, NMXSLookup
+                    let term1, term2
+                    if (tens !== -1) {
+                        valueForNMXSLookup = tens
+                        if (thousandsUnitInSXLookup[unit]) {
+                            NMXSLookup = thousandsTensSXLookup
+                        } else {
+                            NMXSLookup = thousandsTensNMLookup
+                        }
+                    } else {
+                        // There should be a hundreds in this group
+                        valueForNMXSLookup = hundreds
+                        if (thousandsUnitInSXLookup[unit]) {
+                            NMXSLookup = thousandsHundredsSXLookup
+                        } else {
+                            NMXSLookup = thousandsHundredsNMLookup
+                        }
+                    }
+                    if (thousandsUnitInSXLookup[unit]) {
+                        term1 = thousandsUnitTermsS
+                        term2 = thousandsUnitTermsX
+                    } else {
+                        term1 = thousandsUnitTermsN
+                        term2 = thousandsUnitTermsM
+                    }
+                    switch (NMXSLookup[valueForNMXSLookup]) {
+                        case 0:
+                            unitString = thousandsUnitTerms[unit]
+                            break
+                        case 1:
+                            unitString = term1[unit]
+                            break
+                        case 2:
+                            unitString = term2[unit]
+                            break
+                    }
+                }
+            }
             if (tens !== -1) {
-                valueForNMXSLookup = tens
-                if (thousandsUnitInSXLookup[unit]) {
-                    NMXSLookup = thousandsTensSXLookup
-                } else {
-                    NMXSLookup = thousandsTensNMLookup
-                }
-            } else {
-                // It will be impossible to have 0 digit of hundreds
-                // at this point because we checked the edge cases
-                valueForNMXSLookup = hundreds
-                if (thousandsUnitInSXLookup[unit]) {
-                    NMXSLookup = thousandsHundredsSXLookup
-                } else {
-                    NMXSLookup = thousandsHundredsNMLookup
-                }
+                tensString = (
+                    hundreds !== -1 ? thousandsTensTerm : thousandsTensTermTi
+                )[tens]
             }
-            if (thousandsUnitInSXLookup[unit]) {
-                term1 = thousandsUnitTermsS
-                term2 = thousandsUnitTermsX
-            } else {
-                term1 = thousandsUnitTermsN
-                term2 = thousandsUnitTermsM
+            if (hundreds !== -1) {
+                hundredsString = thousandsHundredsTerm[hundreds]
             }
-            switch (NMXSLookup[valueForNMXSLookup]) {
-                case 0:
-                    unitString = thousandsUnitTerms[unit]
-                    break
-                case 1:
-                    unitString = term1[unit]
-                    break
-                case 2:
-                    unitString = term2[unit]
-                    break
-            }
+            result += unitString + tensString + hundredsString + 'lli'
         }
-        if (tens !== -1) {
-            tensString = (
-                hundreds !== -1 ? thousandsTensTerm : thousandsTensTermTi
-            )[tens]
-        }
-        hundredsString = hundreds !== -1 ? thousandsHundredsTerm[hundreds] : ''
 
-        return unitString + tensString + hundredsString + 'llion'
+        return result + 'on'
     }
 
     /**
