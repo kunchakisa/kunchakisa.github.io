@@ -180,6 +180,25 @@ const NumberToEnglishWord = (() => {
             return digit >= 0 && digit < 10
         }
         /**
+         * Parse a string in CSV format. This function converts
+         * number value in a CSV to english words. Other values that
+         * are not numbers will remain untouched.
+         *
+         * The input CSV data should be modified directly
+         * @param {string} csvData - 2-dimensional array of values. Also serves as the output
+         */
+        static parseCSV(csvData) {
+            for (let row = 0; row < csvData.length; row++) {
+                for (let col = 0; col < csvData[row].length; col++) {
+                    try {
+                        csvData[row][col] = NumberToEnglishWord.getEnglishWord(
+                            csvData[row][col]
+                        )
+                    } catch (e) {}
+                }
+            }
+        }
+        /**
          * @param {number} hundredsDigit - digit of hundreds
          * @param {number} tensDigit - digit of tens
          * @param {number} onesDigit - digit of ones
@@ -245,3 +264,5 @@ const NumberToEnglishWord = (() => {
         }
     }
 })()
+
+window.NumberToEnglishWord = NumberToEnglishWord
