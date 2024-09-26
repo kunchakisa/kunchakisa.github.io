@@ -5,20 +5,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         <!-- Prefetch Assets -->
-        <link rel="prefetch" href="assets/glass_red.png" />
-        <link rel="prefetch" href="assets/destroy_stage_0.png" />
-        <link rel="prefetch" href="assets/destroy_stage_1.png" />
-        <link rel="prefetch" href="assets/destroy_stage_2.png" />
-        <link rel="prefetch" href="assets/destroy_stage_3.png" />
-        <link rel="prefetch" href="assets/destroy_stage_4.png" />
-        <link rel="prefetch" href="assets/destroy_stage_5.png" />
-        <link rel="prefetch" href="assets/destroy_stage_6.png" />
-        <link rel="prefetch" href="assets/destroy_stage_7.png" />
-        <link rel="prefetch" href="assets/destroy_stage_8.png" />
-        <link rel="prefetch" href="assets/destroy_stage_9.png" />
-        <link rel="prefetch" href="assets/glass1.ogg" />
-        <link rel="prefetch" href="assets/glass2.ogg" />
-        <link rel="prefetch" href="assets/glass3.ogg" />
+        <link rel="preload" href="assets/glass_red.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_0.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_1.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_2.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_3.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_4.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_5.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_6.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_7.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_8.png" as="image" />
+        <link rel="preload" href="assets/destroy_stage_9.png" as="image" />
+        <link rel="preload" href="assets/glass1.ogg" />
+        <link rel="preload" href="assets/glass2.ogg" />
+        <link rel="preload" href="assets/glass3.ogg" />
 
         <title>BlockBreakBuffer Demo</title>
         <style>
@@ -123,190 +123,189 @@
         <script>
             {
                 let miningSpeedInput =
-                    document.querySelector("#miningSpeedInput");
-                let pingInput = document.querySelector("#pingInput");
+                    document.querySelector('#miningSpeedInput')
+                let pingInput = document.querySelector('#pingInput')
                 let storableTimeInput =
-                    document.querySelector("#storableTimeInput");
-                let mineableAreaDiv =
-                    document.querySelector("#mineableAreaDiv");
-                let storedTimeSpan = document.querySelector("#storedTimeSpan");
-                let storedTimeBar = document.querySelector("#storedTimeBar");
+                    document.querySelector('#storableTimeInput')
+                let mineableAreaDiv = document.querySelector('#mineableAreaDiv')
+                let storedTimeSpan = document.querySelector('#storedTimeSpan')
+                let storedTimeBar = document.querySelector('#storedTimeBar')
 
-                let miningSpeed = 0;
-                let ping = 0;
-                let storableTime = 0;
-                let storedTime = 0;
-                let actions = [];
+                let miningSpeed = 0
+                let ping = 0
+                let storableTime = 0
+                let storedTime = 0
+                let actions = []
 
-                let mineableCellDivs = [[], [], [], [], [], []];
-                let clientMineableCells = [[], [], [], [], [], []];
-                let clientBreakTargetX = -1;
-                let clientBreakTargetY = -1;
-                let clientBreakingBlock = false;
+                let mineableCellDivs = [[], [], [], [], [], []]
+                let clientMineableCells = [[], [], [], [], [], []]
+                let clientBreakTargetX = -1
+                let clientBreakTargetY = -1
+                let clientBreakingBlock = false
 
-                let serverMineableCells = [[], [], [], [], [], []];
-                let serverBreakTargetX = -1;
-                let serverBreakTargetY = -1;
+                let serverMineableCells = [[], [], [], [], [], []]
+                let serverBreakTargetX = -1
+                let serverBreakTargetY = -1
 
-                let pendingServerEvents = [];
-                let pendingClientEvents = [];
-                let pendingRegenerates = [];
+                let pendingServerEvents = []
+                let pendingClientEvents = []
+                let pendingRegenerates = []
 
                 let glassSounds = [
                     new Howl({
-                        src: ["assets/glass1.ogg"],
+                        src: ['assets/glass1.ogg'],
                     }),
                     new Howl({
-                        src: ["assets/glass2.ogg"],
+                        src: ['assets/glass2.ogg'],
                     }),
                     new Howl({
-                        src: ["assets/glass3.ogg"],
+                        src: ['assets/glass3.ogg'],
                     }),
-                ];
+                ]
 
                 miningSpeed = Number(
-                    localStorage.getItem("miningSpeed") ?? "2300"
-                );
-                if (isNaN(miningSpeed)) miningSpeed = 2300;
-                miningSpeedInput.value = String(miningSpeed);
-                miningSpeedInput.addEventListener("input", (event) => {
-                    let processedValue = Number(miningSpeedInput.value);
+                    localStorage.getItem('miningSpeed') ?? '2300'
+                )
+                if (isNaN(miningSpeed)) miningSpeed = 2300
+                miningSpeedInput.value = String(miningSpeed)
+                miningSpeedInput.addEventListener('input', (event) => {
+                    let processedValue = Number(miningSpeedInput.value)
                     if (isNaN(processedValue)) {
-                        miningSpeedInput.classList.toggle("error", true);
-                        return;
+                        miningSpeedInput.classList.toggle('error', true)
+                        return
                     }
                     if (processedValue > 1_000_000) {
-                        miningSpeedInput.value = "1000000";
-                        processedValue = 1_000_000;
+                        miningSpeedInput.value = '1000000'
+                        processedValue = 1_000_000
                     } else if (processedValue < 0) {
-                        miningSpeedInput.value = "0";
-                        processedValue = 0;
+                        miningSpeedInput.value = '0'
+                        processedValue = 0
                     }
-                    miningSpeedInput.classList.toggle("error", false);
-                    miningSpeed = processedValue;
-                    localStorage.setItem("miningSpeed", processedValue);
-                });
+                    miningSpeedInput.classList.toggle('error', false)
+                    miningSpeed = processedValue
+                    localStorage.setItem('miningSpeed', processedValue)
+                })
 
-                ping = Number(localStorage.getItem("ping") ?? "0");
-                if (isNaN(ping)) ping = 0;
-                pingInput.value = String(ping);
-                pingInput.addEventListener("input", (event) => {
-                    let processedValue = Number(pingInput.value);
+                ping = Number(localStorage.getItem('ping') ?? '0')
+                if (isNaN(ping)) ping = 0
+                pingInput.value = String(ping)
+                pingInput.addEventListener('input', (event) => {
+                    let processedValue = Number(pingInput.value)
                     if (isNaN(processedValue)) {
-                        pingInput.classList.toggle("error", true);
-                        return;
+                        pingInput.classList.toggle('error', true)
+                        return
                     }
                     if (processedValue > 1000) {
-                        pingInput.value = "1000";
-                        processedValue = 1000;
+                        pingInput.value = '1000'
+                        processedValue = 1000
                     } else if (processedValue < 0) {
-                        pingInput.value = "0";
-                        processedValue = 0;
+                        pingInput.value = '0'
+                        processedValue = 0
                     }
-                    pingInput.classList.toggle("error", false);
-                    ping = processedValue;
-                    localStorage.setItem("ping", processedValue);
-                });
+                    pingInput.classList.toggle('error', false)
+                    ping = processedValue
+                    localStorage.setItem('ping', processedValue)
+                })
 
                 storableTime = Number(
-                    localStorage.getItem("storableTime") ?? "0"
-                );
-                if (isNaN(storableTime)) storableTime = 0;
-                storableTimeInput.value = String(storableTime);
-                storableTimeInput.addEventListener("input", (event) => {
-                    let processedValue = Number(storableTimeInput.value);
+                    localStorage.getItem('storableTime') ?? '0'
+                )
+                if (isNaN(storableTime)) storableTime = 0
+                storableTimeInput.value = String(storableTime)
+                storableTimeInput.addEventListener('input', (event) => {
+                    let processedValue = Number(storableTimeInput.value)
                     if (isNaN(processedValue)) {
-                        storableTimeInput.classList.toggle("error", true);
-                        return;
+                        storableTimeInput.classList.toggle('error', true)
+                        return
                     }
                     if (processedValue > 10000) {
-                        storableTimeInput.value = "10000";
-                        processedValue = 10000;
+                        storableTimeInput.value = '10000'
+                        processedValue = 10000
                     } else if (processedValue < 0) {
-                        storableTimeInput.value = "0";
-                        processedValue = 0;
+                        storableTimeInput.value = '0'
+                        processedValue = 0
                     }
-                    storableTimeInput.classList.toggle("error", false);
-                    storableTime = processedValue;
-                    localStorage.setItem("storableTime", processedValue);
-                    if (storedTime > storableTime) storedTime = storableTime;
-                });
+                    storableTimeInput.classList.toggle('error', false)
+                    storableTime = processedValue
+                    localStorage.setItem('storableTime', processedValue)
+                    if (storedTime > storableTime) storedTime = storableTime
+                })
 
                 // Add function to remove block breaking when leaving grid
-                ["pointerleave"].forEach((eventName) => {
+                ;['pointerleave'].forEach((eventName) => {
                     mineableAreaDiv.addEventListener(eventName, () => {
                         if (clientBreakingBlock) {
                             if (clientBreakTargetX !== -1) {
-                                clientBreakTargetX = -1;
-                                clientBreakTargetY = -1;
-                                clientBreakingBlock = false;
+                                clientBreakTargetX = -1
+                                clientBreakTargetY = -1
+                                clientBreakingBlock = false
                                 pendingServerEvents.push({
                                     timeSent: Date.now(),
-                                    type: "stop_break",
-                                });
+                                    type: 'stop_break',
+                                })
                             }
                         }
-                    });
-                });
+                    })
+                })
 
                 function createNewMineableArea() {
                     // Generate a 5x6 Grid
-                    clientMineableCells = [];
-                    serverMineableCells = [];
+                    clientMineableCells = []
+                    serverMineableCells = []
                     for (let y = 0; y < 6; y++) {
-                        clientMineableCells[y] = [];
-                        serverMineableCells[y] = [];
+                        clientMineableCells[y] = []
+                        serverMineableCells[y] = []
                         for (let x = 0; x < 5; x++) {
                             // Elem that holds glass texture, and
-                            let glassDiv = document.createElement("div");
-                            glassDiv.classList.add("mineableCellGlass");
-                            glassDiv.style.backgroundImage = `url("assets/glass_red.png")`;
+                            let glassDiv = document.createElement('div')
+                            glassDiv.classList.add('mineableCellGlass')
+                            glassDiv.style.backgroundImage = `url("assets/glass_red.png")`
                             // Logic to send block break stuff
-                            let glassDivCoords = { x, y };
-                            ["mousedown", "touchstart", "pointerdown"].forEach(
+                            let glassDivCoords = { x, y }
+                            ;['mousedown', 'touchstart', 'pointerdown'].forEach(
                                 (eventName) => {
                                     glassDiv.addEventListener(
                                         eventName,
                                         (ev) => {
-                                            ev.preventDefault();
+                                            ev.preventDefault()
                                             ev.target.releasePointerCapture(
                                                 ev.pointerId
-                                            );
-                                            clientBreakingBlock = true;
+                                            )
+                                            clientBreakingBlock = true
                                             clientBreakTargetX =
-                                                glassDivCoords.x;
+                                                glassDivCoords.x
                                             clientBreakTargetY =
-                                                glassDivCoords.y;
+                                                glassDivCoords.y
                                             pendingServerEvents.push({
                                                 timeSent: Date.now(),
-                                                type: "start_break",
+                                                type: 'start_break',
                                                 x: clientBreakTargetX,
                                                 y: clientBreakTargetY,
-                                            });
+                                            })
                                         }
-                                    );
+                                    )
                                 }
-                            );
-                            [
-                                "mouseup",
-                                "touchend",
-                                "touchcancel",
-                                "pointerup",
+                            )
+                            ;[
+                                'mouseup',
+                                'touchend',
+                                'touchcancel',
+                                'pointerup',
                             ].forEach((eventName) => {
                                 glassDiv.addEventListener(eventName, (ev) => {
-                                    ev.preventDefault();
-                                    clientBreakingBlock = false;
-                                    clientBreakTargetX = -1;
-                                    clientBreakTargetY = -1;
+                                    ev.preventDefault()
+                                    clientBreakingBlock = false
+                                    clientBreakTargetX = -1
+                                    clientBreakTargetY = -1
                                     pendingServerEvents.push({
                                         timeSent: Date.now(),
-                                        type: "stop_break",
-                                    });
-                                });
-                            });
-                            ["pointerenter", "t"].forEach((eventName) => {
+                                        type: 'stop_break',
+                                    })
+                                })
+                            })
+                            ;['pointerenter', 't'].forEach((eventName) => {
                                 glassDiv.addEventListener(eventName, (ev) => {
-                                    ev.preventDefault();
+                                    ev.preventDefault()
                                     if (clientBreakingBlock) {
                                         if (
                                             clientBreakTargetX !==
@@ -315,59 +314,59 @@
                                                 glassDivCoords.y
                                         ) {
                                             clientBreakTargetX =
-                                                glassDivCoords.x;
+                                                glassDivCoords.x
                                             clientBreakTargetY =
-                                                glassDivCoords.y;
+                                                glassDivCoords.y
                                             pendingServerEvents.push({
                                                 timeSent: Date.now(),
-                                                type: "start_break",
+                                                type: 'start_break',
                                                 x: clientBreakTargetX,
                                                 y: clientBreakTargetY,
-                                            });
+                                            })
                                         }
                                     }
-                                });
-                            });
-                            let blockBreakDiv = document.createElement("div");
-                            blockBreakDiv.classList.add("mineableCellBreak");
-                            glassDiv.appendChild(blockBreakDiv);
-                            mineableAreaDiv.appendChild(glassDiv);
+                                })
+                            })
+                            let blockBreakDiv = document.createElement('div')
+                            blockBreakDiv.classList.add('mineableCellBreak')
+                            glassDiv.appendChild(blockBreakDiv)
+                            mineableAreaDiv.appendChild(glassDiv)
                             clientMineableCells[y][x] = {
-                                name: "glass_red",
+                                name: 'glass_red',
                                 breakProgress: 0, // 0.0 - 1.0, sent by server
-                            };
+                            }
                             serverMineableCells[y][x] = {
                                 blockHP: 2300 * 30,
                                 blockDamage: 0, // in terms of HP
-                            };
+                            }
                             mineableCellDivs[y][x] = {
                                 glassDiv,
                                 blockBreakDiv,
-                            };
+                            }
                         }
                     }
                 }
 
-                let accumulatorTime = 0;
+                let accumulatorTime = 0
 
                 function loop() {
-                    let now = Date.now();
-                    let stepsRemaining = 3;
+                    let now = Date.now()
+                    let stepsRemaining = 3
                     while (now - accumulatorTime > 1000 / 20) {
                         if (stepsRemaining === 0) {
-                            accumulatorTime = now;
-                            break;
+                            accumulatorTime = now
+                            break
                         }
-                        stepsRemaining -= 1;
-                        accumulatorTime += 1000 / 20;
+                        stepsRemaining -= 1
+                        accumulatorTime += 1000 / 20
 
                         // Simulate server things (receive attempt to break, stop attempt)
                         while (pendingServerEvents.length > 0) {
-                            let event = pendingServerEvents[0];
+                            let event = pendingServerEvents[0]
                             // Check if the event should have reached the target by now
                             if (accumulatorTime < event.timeSent + ping / 2)
-                                break;
-                            if (event.type === "start_break") {
+                                break
+                            if (event.type === 'start_break') {
                                 // Reset break progress of block
                                 if (
                                     serverBreakTargetX !== -1 &&
@@ -377,19 +376,19 @@
                                 ) {
                                     serverMineableCells[serverBreakTargetY][
                                         serverBreakTargetX
-                                    ].blockDamage = 0;
+                                    ].blockDamage = 0
                                     pendingClientEvents.push({
                                         timeSent: accumulatorTime,
-                                        type: "break_progress",
+                                        type: 'break_progress',
                                         x: serverBreakTargetX,
                                         y: serverBreakTargetY,
                                         progress: -1,
-                                    });
+                                    })
                                 }
-                                serverBreakTargetY = event.y;
-                                serverBreakTargetX = event.x;
+                                serverBreakTargetY = event.y
+                                serverBreakTargetX = event.x
                             }
-                            if (event.type === "stop_break") {
+                            if (event.type === 'stop_break') {
                                 // Reset break progress of block
                                 if (
                                     serverBreakTargetX !== -1 &&
@@ -399,38 +398,38 @@
                                 ) {
                                     serverMineableCells[serverBreakTargetY][
                                         serverBreakTargetX
-                                    ].blockDamage = 0;
+                                    ].blockDamage = 0
                                     pendingClientEvents.push({
                                         timeSent: accumulatorTime,
-                                        type: "break_progress",
+                                        type: 'break_progress',
                                         x: serverBreakTargetX,
                                         y: serverBreakTargetY,
                                         progress: -1,
-                                    });
+                                    })
                                 }
-                                serverBreakTargetX = -1;
-                                serverBreakTargetY = -1;
+                                serverBreakTargetX = -1
+                                serverBreakTargetY = -1
                             }
-                            pendingServerEvents.splice(0, 1);
+                            pendingServerEvents.splice(0, 1)
                         }
 
                         // Respawn blocks
                         while (pendingRegenerates.length > 0) {
-                            let regenEvent = pendingRegenerates[0];
+                            let regenEvent = pendingRegenerates[0]
                             // Check if the event should have reached the target by now
-                            if (accumulatorTime < regenEvent.time) break;
+                            if (accumulatorTime < regenEvent.time) break
                             serverMineableCells[regenEvent.y][regenEvent.x] = {
                                 blockHP: 2300 * 30,
                                 blockDamage: 0,
-                            };
+                            }
                             pendingClientEvents.push({
                                 timeSent: accumulatorTime,
-                                type: "spawn",
+                                type: 'spawn',
                                 x: regenEvent.x,
                                 y: regenEvent.y,
-                                name: "glass_red",
-                            });
-                            pendingRegenerates.splice(0, 1);
+                                name: 'glass_red',
+                            })
+                            pendingRegenerates.splice(0, 1)
                         }
 
                         // Damage blocks
@@ -438,7 +437,7 @@
                             let targetMineableCell =
                                 serverMineableCells[serverBreakTargetY][
                                     serverBreakTargetX
-                                ];
+                                ]
                             if (targetMineableCell) {
                                 if (
                                     targetMineableCell.blockHP * 2 <=
@@ -446,26 +445,26 @@
                                 ) {
                                     // Instantly break it
                                     targetMineableCell.blockDamage =
-                                        targetMineableCell.blockHP;
+                                        targetMineableCell.blockHP
                                 } else {
                                     // Softcap consideration
                                     let intendedDamage = Math.min(
                                         targetMineableCell.blockHP * 0.25,
                                         miningSpeed
-                                    );
+                                    )
                                     let damage = Math.min(
                                         intendedDamage *
                                             (1 + storedTime / (1000 / 20)),
                                         targetMineableCell.blockHP -
                                             targetMineableCell.blockDamage
-                                    );
+                                    )
                                     console.log(
                                         damage,
                                         intendedDamage,
                                         miningSpeed,
                                         targetMineableCell.blockHP
-                                    );
-                                    targetMineableCell.blockDamage += damage;
+                                    )
+                                    targetMineableCell.blockDamage += damage
                                     storedTime = Math.max(
                                         0,
                                         Math.min(
@@ -475,7 +474,7 @@
                                                     (damage / intendedDamage -
                                                         1)
                                         )
-                                    );
+                                    )
                                 }
                                 // Check if block is broken
                                 if (
@@ -484,95 +483,95 @@
                                 ) {
                                     serverMineableCells[serverBreakTargetY][
                                         serverBreakTargetX
-                                    ] = undefined;
+                                    ] = undefined
                                     pendingClientEvents.push({
                                         timeSent: accumulatorTime,
-                                        type: "break",
+                                        type: 'break',
                                         x: serverBreakTargetX,
                                         y: serverBreakTargetY,
-                                    });
+                                    })
                                     pendingRegenerates.push({
                                         time: accumulatorTime,
                                         x: serverBreakTargetX,
                                         y: serverBreakTargetY,
-                                    });
-                                    serverBreakTargetX = -1;
-                                    serverBreakTargetY = -1;
+                                    })
+                                    serverBreakTargetX = -1
+                                    serverBreakTargetY = -1
                                 } else {
                                     // Send progress event to client
                                     pendingClientEvents.push({
                                         timeSent: accumulatorTime,
-                                        type: "break_progress",
+                                        type: 'break_progress',
                                         x: serverBreakTargetX,
                                         y: serverBreakTargetY,
                                         progress:
                                             targetMineableCell.blockDamage /
                                             targetMineableCell.blockHP,
-                                    });
+                                    })
                                 }
                             }
                         } else {
                             storedTime = Math.min(
                                 storableTime,
                                 storedTime + 1000 / 20
-                            );
+                            )
                         }
 
                         // Simulate client things (receive break, progress, spawn)
                         while (pendingClientEvents.length > 0) {
-                            let event = pendingClientEvents[0];
+                            let event = pendingClientEvents[0]
                             // Check if the event should have reached the target by now
                             if (accumulatorTime < event.timeSent + ping / 2)
-                                break;
-                            if (event.type === "break") {
+                                break
+                            if (event.type === 'break') {
                                 // Remove block client side
                                 clientMineableCells[event.y][event.x] =
-                                    undefined;
+                                    undefined
                                 mineableCellDivs[event.y][
                                     event.x
-                                ].glassDiv.style.backgroundImage = "";
+                                ].glassDiv.style.backgroundImage = ''
                                 mineableCellDivs[event.y][
                                     event.x
-                                ].blockBreakDiv.style.backgroundImage = "";
+                                ].blockBreakDiv.style.backgroundImage = ''
                                 // Play sound
                                 let sound =
-                                    glassSounds[Math.floor(Math.random() * 3)];
-                                let soundId = sound.play();
-                                sound.rate(0.95, soundId);
+                                    glassSounds[Math.floor(Math.random() * 3)]
+                                let soundId = sound.play()
+                                sound.rate(0.95, soundId)
                             }
-                            if (event.type === "break_progress") {
+                            if (event.type === 'break_progress') {
                                 // Set break progress
                                 if (clientMineableCells[event.y][event.x]) {
                                     clientMineableCells[event.y][
                                         event.x
-                                    ].breakProgress = event.progress;
+                                    ].breakProgress = event.progress
                                 }
                                 if (event.progress < 0) {
                                     mineableCellDivs[event.y][
                                         event.x
-                                    ].blockBreakDiv.style.backgroundImage = "";
+                                    ].blockBreakDiv.style.backgroundImage = ''
                                 } else {
                                     let destroyStage = Math.min(
                                         9,
                                         Math.floor(event.progress * 10)
-                                    );
+                                    )
                                     mineableCellDivs[event.y][
                                         event.x
-                                    ].blockBreakDiv.style.backgroundImage = `url("assets/destroy_stage_${destroyStage}.png")`;
+                                    ].blockBreakDiv.style.backgroundImage = `url("assets/destroy_stage_${destroyStage}.png")`
                                 }
                             }
-                            if (event.type === "spawn") {
+                            if (event.type === 'spawn') {
                                 // Refresh divs
                                 clientMineableCells[event.y][event.x] = {
                                     breakProgress: -1,
                                     name: event.name,
-                                };
+                                }
                                 mineableCellDivs[event.y][
                                     event.x
-                                ].glassDiv.style.backgroundImage = `url("assets/${event.name}.png")`;
+                                ].glassDiv.style.backgroundImage = `url("assets/${event.name}.png")`
                                 mineableCellDivs[event.y][
                                     event.x
-                                ].blockBreakDiv.style.backgroundImage = "";
+                                ].blockBreakDiv.style.backgroundImage = ''
                                 // Send block breaking event if holding block in this spot
                                 // Remove mining progress if mining the currently broken block
                                 if (
@@ -582,32 +581,30 @@
                                 ) {
                                     pendingServerEvents.push({
                                         timeSent: Date.now(),
-                                        type: "start_break",
+                                        type: 'start_break',
                                         x: clientBreakTargetX,
                                         y: clientBreakTargetY,
-                                    });
+                                    })
                                 }
                             }
-                            pendingClientEvents.splice(0, 1);
+                            pendingClientEvents.splice(0, 1)
                         }
 
                         // Update some UI
-                        storedTimeSpan.innerText = `${storedTime.toFixed(
-                            0
-                        )} ms`;
+                        storedTimeSpan.innerText = `${storedTime.toFixed(0)} ms`
                         if (storableTime === 0) {
-                            storedTimeBar.style.width = "100%";
+                            storedTimeBar.style.width = '100%'
                         } else {
                             storedTimeBar.style.width = `${
                                 (storedTime / storableTime) * 100
-                            }%`;
+                            }%`
                         }
                     }
                 }
 
-                window.setInterval(loop, 1000 / 20 / 2.5);
+                window.setInterval(loop, 1000 / 20 / 2.5)
 
-                createNewMineableArea();
+                createNewMineableArea()
             }
         </script>
     </body>
